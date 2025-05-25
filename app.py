@@ -5,6 +5,7 @@ import re
 import pandas as pd
 from time import sleep
 import io
+import os
 
 # Page configuration
 st.set_page_config(
@@ -20,7 +21,29 @@ st.markdown("Extract author contact information from PubMed publications")
 # Sidebar for configuration
 with st.sidebar:
     st.header("🔧 Configuration")
-    api_key = st.text_input("PubMed API Key", type="password", help="Enter your PubMed API key")
+    
+    # Try multiple methods to get API key
+    api_key = None
+    
+    # Method 1: Streamlit secrets
+    try:
+        api_key = st.secrets["PUBMED_API_KEY"]
+        st.success("✅ API Key loaded from Streamlit secrets")
+    except:
+        pass
+    
+    # Method 2: Environment variable
+    if not api_key:
+        api_key = os.getenv("PUBMED_API_KEY")
+        if api_key:
+            st.success("✅ API Key loaded from environment variable")
+    
+    # Method 3: Manual input (fallback)
+    if not api_key:
+        api_key = st.text_input("PubMed API Key", type="password", help="Enter your PubMed API key")
+        if api_key:
+            st.info("🔑 Using manually entered API key")
+    
     max_results = st.slider("Maximum Results", min_value=10, max_value=10000, value=1000, step=10)
     
     st.header("📋 Filter Options")
